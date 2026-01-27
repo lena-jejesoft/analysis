@@ -1,0 +1,2056 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SectorBook — Left Rail + Context Panel (Mock)</title>
+  <style>
+    :root{
+      --bg:#0b0d10;
+      --panel:#0f1217;
+      --panel2:#0d1014;
+      --border:#1f2530;
+      --text:#e9eef6;
+      --muted:#9aa6b2;
+      --accent:#D97757;
+      --danger:#ff5a6b;
+      --radius:12px;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --header:56px;
+      --rail:64px;
+      --ctx:340px;
+    }
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans KR", Arial, "Apple SD Gothic Neo";
+      background: radial-gradient(1200px 600px at 30% 0%, rgba(217,119,87,.09), transparent 65%),
+                  radial-gradient(900px 500px at 90% 30%, rgba(255,90,107,.06), transparent 60%),
+                  var(--bg);
+      color:var(--text);
+    }
+
+    /* Layout */
+    .app{
+      height:100%;
+      display:grid;
+      grid-template-rows: var(--header) 1fr;
+      grid-template-columns: var(--rail) var(--ctx) 1fr;
+      grid-template-areas:
+        "header header header"
+        "rail context main";
+    }
+    .app.context-collapsed{
+      --ctx: 0px;
+    }
+    .app.context-collapsed .context{
+      display: none;
+    }
+
+    /* Header */
+    .header{
+      grid-area: header;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));
+    }
+    .header-brand{
+      font-family: 'Courier New', 'Monaco', 'Consolas', monospace;
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: #D97757;
+      cursor: pointer;
+      transition: .15s transform, .15s color, .15s text-shadow;
+      text-shadow: 0 0 8px rgba(217,119,87,.3);
+    }
+    .header-brand:hover{
+      transform: translateY(-1px);
+      color: #E8936F;
+      text-shadow: 0 0 12px rgba(217,119,87,.5);
+    }
+    .account-btn{
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.02);
+      cursor: pointer;
+      color: var(--muted);
+      transition: .15s transform, .15s background, .15s color, .15s border-color;
+    }
+    .account-btn:hover{
+      transform: translateY(-1px);
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      border-color: rgba(217,119,87,.5);
+    }
+    .account-btn svg{
+      width: 20px;
+      height: 20px;
+    }
+
+    /* Left Rail */
+    .rail{
+      grid-area: rail;
+      border-right:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));
+      padding:10px 8px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      align-items:center;
+    }
+    .icon-btn{
+      width:44px;height:44px;border-radius:12px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.02);
+      display:grid;place-items:center;
+      cursor:pointer;
+      color:var(--muted);
+      transition:.15s transform, .15s background, .15s border-color, .15s color;
+      position: relative;
+    }
+    .icon-btn:hover{ transform: translateY(-1px); background:rgba(255,255,255,.04); color:var(--text); }
+    .icon-btn.active{
+      border-color: rgba(217,119,87,.5);
+      background: rgba(217,119,87,.12);
+      color: var(--text);
+    }
+    .icon-btn svg{
+      width: 20px;
+      height: 20px;
+    }
+    .icon-btn .tooltip{
+      position: absolute;
+      left: 56px;
+      top: 50%;
+      transform: translateY(-50%) translateX(-6px);
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      background: rgba(15,18,23,.98);
+      border-radius: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: .15s opacity, .15s transform;
+      box-shadow: var(--shadow);
+      z-index: 100;
+    }
+    .icon-btn:hover .tooltip{
+      opacity: 1;
+      transform: translateY(-50%) translateX(0);
+    }
+    .rail-spacer{ flex:1; }
+    .rail-bottom{
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: center;
+    }
+    .mode-toggle{
+      width:44px;height:44px;border-radius:12px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.02);
+      display:grid;place-items:center;
+      cursor:pointer;
+      color:var(--muted);
+      transition:.15s transform, .15s background, .15s color;
+      position:relative;
+    }
+    .mode-toggle:hover{ transform: translateY(-1px); background:rgba(255,255,255,.04); color:var(--text); }
+    .mode-toggle svg{
+      width: 20px;
+      height: 20px;
+    }
+    .mode-toggle .tooltip{
+      position:absolute;
+      left:56px;
+      top: 50%;
+      transform: translateY(-50%) translateX(-6px);
+      padding:6px 10px;
+      border:1px solid var(--border);
+      background:rgba(15,18,23,.98);
+      border-radius:8px;
+      color:var(--muted);
+      font-size:12px;
+      white-space:nowrap;
+      opacity:0;
+      pointer-events:none;
+      transition:.15s opacity, .15s transform;
+      box-shadow: var(--shadow);
+      z-index: 100;
+    }
+    .mode-toggle:hover .tooltip{ opacity:1; transform: translateY(-50%) translateX(0); }
+    .panel-toggle{
+      width:44px;height:44px;border-radius:12px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.02);
+      display:grid;place-items:center;
+      cursor:pointer;
+      color:var(--muted);
+      transition:.15s transform, .15s background, .15s color;
+      position:relative;
+    }
+    .panel-toggle:hover{ transform: translateY(-1px); background:rgba(255,255,255,.04); color:var(--text); }
+    .panel-toggle svg{
+      width: 20px;
+      height: 20px;
+      transition: .2s transform;
+    }
+    .panel-toggle.collapsed svg{
+      transform: rotate(180deg);
+    }
+    .panel-toggle .tooltip{
+      position:absolute;
+      left:56px;
+      top: 50%;
+      transform: translateY(-50%) translateX(-6px);
+      padding:6px 10px;
+      border:1px solid var(--border);
+      background:rgba(15,18,23,.98);
+      border-radius:8px;
+      color:var(--muted);
+      font-size:12px;
+      white-space:nowrap;
+      opacity:0;
+      pointer-events:none;
+      transition:.15s opacity, .15s transform;
+      box-shadow: var(--shadow);
+      z-index: 100;
+    }
+    .panel-toggle:hover .tooltip{ opacity:1; transform: translateY(-50%) translateX(0); }
+
+    /* Context Panel */
+    .context{
+      grid-area: context;
+      border-right:1px solid var(--border);
+      background: rgba(15,18,23,.85);
+      backdrop-filter: blur(8px);
+      padding:14px 14px 12px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      min-width:0;
+      overflow: hidden;
+      transition: .2s width;
+    }
+    .ctx-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:6px 6px 0;
+    }
+    .ctx-title{
+      font-size:14px;
+      font-weight:700;
+      letter-spacing:.2px;
+    }
+    .ctx-sub{
+      font-size:12px;
+      color:var(--muted);
+    }
+    .tabs{
+      display:flex;
+      gap:8px;
+      padding:8px 6px 6px;
+      border-bottom:1px solid var(--border);
+    }
+    .tab{
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.02);
+      font-size:12px;
+      color:var(--muted);
+      cursor:pointer;
+      user-select:none;
+    }
+    .tab.active{
+      border-color: rgba(217,119,87,.5);
+      background: rgba(217,119,87,.12);
+      color: var(--text);
+    }
+    .panel{
+      display:none;
+      min-height:0;
+      flex:1;
+      overflow:auto;
+      padding:8px 6px 6px;
+    }
+    .panel.active{ display:block; }
+
+    /* Explorer */
+    .search{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      padding:10px;
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      background:rgba(255,255,255,.02);
+    }
+    .search svg{
+      width: 16px;
+      height: 16px;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+    .search input{
+      width:100%;
+      background:transparent;
+      border:none;
+      outline:none;
+      color:var(--text);
+      font-size:13px;
+    }
+    .section{
+      margin-top:12px;
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      background:rgba(255,255,255,.015);
+      overflow:hidden;
+    }
+    .section-h{
+      padding:10px 12px;
+      font-size:12px;
+      color:var(--muted);
+      border-bottom:1px solid var(--border);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .list{ display:flex; flex-direction:column; }
+    .item{
+      padding:10px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      cursor:pointer;
+      border-top:1px solid rgba(31,37,48,.6);
+      color:var(--text);
+    }
+    .item:first-child{ border-top:none; }
+    .item:hover{ background:rgba(255,255,255,.03); }
+    .item .meta{ color:var(--muted); font-size:12px; }
+    .badge{
+      font-size:11px;
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      color:var(--muted);
+      background:rgba(255,255,255,.02);
+    }
+    .item.active{
+      background: rgba(217,119,87,.10);
+      outline: 1px solid rgba(217,119,87,.35);
+    }
+
+    .preview{
+      padding:10px 12px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .kv{
+      display:grid;
+      grid-template-columns: 1fr auto;
+      gap:8px 10px;
+      font-size:12px;
+      color:var(--muted);
+    }
+    .kv b{ color:var(--text); font-weight:600; }
+    .actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .btn{
+      font-size:12px;
+      padding:8px 10px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.02);
+      color:var(--text);
+      cursor:pointer;
+    }
+    .btn.primary{
+      border-color: rgba(217,119,87,.5);
+      background: rgba(217,119,87,.14);
+    }
+    .btn.ghost{ color:var(--muted); }
+    .hint{
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.4;
+    }
+
+    /* Files */
+    .dropzone{
+      border:1px dashed rgba(154,166,178,.45);
+      border-radius: var(--radius);
+      padding:14px 12px;
+      background: rgba(255,255,255,.015);
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      align-items:flex-start;
+    }
+    .dropzone strong{ font-size:13px; }
+    .dropzone small{ color:var(--muted); }
+    .file-row{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    input[type="file"]{
+      display:none;
+    }
+    .fake-file{
+      font-size:12px;
+      padding:8px 10px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.02);
+      cursor:pointer;
+      color:var(--text);
+    }
+
+    /* Main Canvas */
+    .main{
+      grid-area: main;
+      padding:18px;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      min-width:0;
+    }
+    .canvas{
+      flex:1;
+      border:1px solid var(--border);
+      border-radius:16px;
+      background: rgba(255,255,255,.02);
+      box-shadow: var(--shadow);
+      padding:16px;
+      min-height:260px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      overflow:hidden;
+    }
+    .canvas h2{ margin:0; font-size:16px; }
+    .canvas p{ margin:0; color:var(--muted); font-size:13px; line-height:1.4; }
+    .flow{
+      margin-top:10px;
+      border-top:1px solid var(--border);
+      padding-top:12px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      color:var(--muted);
+      font-size:12px;
+    }
+    .chip{
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:rgba(255,255,255,.02);
+    }
+    /* Light Mode */
+    body.light{
+      --bg:#f6f7fb;
+      --panel:#ffffff;
+      --panel2:#fbfbfe;
+      --border:#e2e6ef;
+      --text:#101521;
+      --muted:#5a6777;
+      --shadow: 0 10px 24px rgba(16,21,33,.08);
+      background: radial-gradient(1200px 600px at 30% 0%, rgba(217,119,87,.06), transparent 65%),
+                  radial-gradient(900px 500px at 90% 30%, rgba(255,90,107,.04), transparent 60%),
+                  var(--bg);
+    }
+    body.light .context{ background: rgba(255,255,255,.85); }
+    body.light .header{ background: rgba(255,255,255,.6); }
+    body.light .rail{ background: linear-gradient(180deg, rgba(255,255,255,.4), rgba(255,255,255,.1)); }
+    body.light .mode-toggle .tooltip,
+    body.light .panel-toggle .tooltip,
+    body.light .icon-btn .tooltip{
+      background: rgba(255,255,255,.98);
+      border-color: var(--border);
+    }
+
+    /* Source Expand Accordion */
+    .company-item-wrapper {
+      position: relative;
+    }
+    .source-expand {
+      background: rgba(217,119,87,.05);
+      border-top: 1px solid var(--border);
+      padding: 12px;
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: max-height 0.25s ease, opacity 0.2s ease, padding 0.25s ease;
+    }
+    .source-expand.open {
+      max-height: 200px;
+      opacity: 1;
+      padding: 12px;
+    }
+    .source-expand-header {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .source-checkbox-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 16px;
+    }
+    .source-checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      color: var(--text);
+    }
+    .source-checkbox-item:hover {
+      color: var(--accent);
+    }
+    .source-checkbox-item input[type="checkbox"] {
+      width: 14px;
+      height: 14px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+    .source-checkbox-item .source-icon {
+      font-size: 14px;
+    }
+    .source-expand-actions {
+      margin-top: 12px;
+      display: flex;
+      justify-content: flex-end;
+    }
+    .select-btn {
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .select-btn:hover {
+      background: rgba(217,119,87,.14);
+      border-color: rgba(217,119,87,.5);
+    }
+    .select-btn.expanded {
+      background: rgba(217,119,87,.14);
+      border-color: rgba(217,119,87,.5);
+    }
+
+    /* Dataset preview - Source List */
+    .source-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 10px 12px;
+    }
+    .source-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: rgba(255,255,255,.02);
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .source-card:hover {
+      background: rgba(255,255,255,.04);
+      border-color: rgba(217,119,87,.3);
+    }
+    .source-card-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .source-card-icon {
+      font-size: 18px;
+    }
+    .source-card-name {
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .source-card-actions {
+      display: flex;
+      gap: 6px;
+    }
+    .source-card-btn {
+      font-size: 11px;
+      padding: 5px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.02);
+      color: var(--muted);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+      white-space: nowrap;
+    }
+    .source-card-btn:hover {
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+    }
+    .source-card-btn.primary {
+      border-color: rgba(217,119,87,.5);
+      background: rgba(217,119,87,.14);
+      color: var(--text);
+    }
+    .source-empty {
+      padding: 20px 12px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    /* Source card checkbox */
+    .source-card-checkbox {
+      width: 14px;
+      height: 14px;
+      accent-color: var(--accent);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    /* Source action bar */
+    .source-action-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-top: 1px solid var(--border);
+      background: rgba(255,255,255,.02);
+    }
+    .source-action-bar .selection-count {
+      font-size: 12px;
+      color: var(--muted);
+      margin-right: auto;
+    }
+    .source-action-bar.no-selection .selection-count,
+    .source-action-bar.no-selection .delete-selected-btn {
+      display: none;
+    }
+    .source-action-bar .action-hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-right: auto;
+    }
+    .source-action-bar:not(.no-selection) .action-hint {
+      display: none;
+    }
+
+    /* Schema Mode Styles */
+    .schema-item {
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      cursor: pointer;
+      border-top: 1px solid rgba(31,37,48,.6);
+      color: var(--text);
+    }
+    .schema-item:first-child { border-top: none; }
+    .schema-item:hover { background: rgba(255,255,255,.03); }
+    .schema-item-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      min-width: 0;
+    }
+    .schema-item-name {
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .schema-source-tag {
+      font-size: 10px;
+      padding: 3px 6px;
+      border-radius: 4px;
+      font-weight: 500;
+      white-space: nowrap;
+      background: rgba(255,255,255,.05);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      position: relative;
+    }
+    .schema-source-tag .source-tooltip {
+      position: absolute;
+      bottom: 100%;
+      left: 0;
+      transform: none;
+      padding: 10px 14px;
+      background: rgba(15,18,23,.98);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 11px;
+      color: var(--text);
+      white-space: normal;
+      width: 200px;
+      min-height: 40px;
+      line-height: 1.5;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s;
+      z-index: 100;
+      margin-bottom: 6px;
+    }
+    .schema-source-tag:hover .source-tooltip {
+      opacity: 1;
+    }
+    .schema-actions {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .schema-action-btn {
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.02);
+      color: var(--muted);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .schema-action-btn:hover {
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+    }
+    .schema-action-btn.add-btn:hover {
+      background: rgba(217,119,87,.14);
+      border-color: rgba(217,119,87,.5);
+      color: var(--text);
+    }
+    .schema-action-btn.remove-btn:hover {
+      background: rgba(255,90,107,.14);
+      border-color: rgba(255,90,107,.5);
+      color: var(--danger);
+    }
+    .schema-detail {
+      background: rgba(217,119,87,.05);
+      border-top: 1px solid var(--border);
+      padding: 0;
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: max-height 0.25s ease, opacity 0.2s ease, padding 0.25s ease;
+    }
+    .schema-detail.open {
+      max-height: 300px;
+      opacity: 1;
+      padding: 12px;
+    }
+    .schema-detail-header {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .schema-field-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .schema-field-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      padding: 6px 8px;
+      background: rgba(255,255,255,.02);
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+    .schema-field-name {
+      font-weight: 500;
+      color: var(--text);
+    }
+    .schema-field-type {
+      color: var(--muted);
+      font-size: 11px;
+    }
+    .schema-empty {
+      padding: 20px 12px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .field-name-input {
+      flex: 1;
+      min-width: 60px;
+      padding: 4px 8px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: rgba(255,255,255,.02);
+      color: var(--text);
+      font-size: 12px;
+      outline: none;
+    }
+    .field-name-input:focus {
+      border-color: rgba(217,119,87,.5);
+    }
+    .field-def-input {
+      flex: 2;
+      min-width: 100px;
+      padding: 4px 8px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: rgba(255,255,255,.02);
+      color: var(--muted);
+      font-size: 11px;
+      outline: none;
+    }
+    .field-def-input:focus {
+      border-color: rgba(217,119,87,.5);
+      color: var(--text);
+    }
+    .field-def-input::placeholder {
+      color: var(--muted);
+      opacity: 0.6;
+    }
+    .field-delete-btn {
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.02);
+      color: var(--muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .field-delete-btn:hover {
+      background: rgba(255,90,107,.14);
+      border-color: rgba(255,90,107,.5);
+      color: var(--danger);
+    }
+    .schema-edit-actions {
+      margin-top: 10px;
+      display: flex;
+      gap: 8px;
+    }
+    .schema-global-actions {
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .schema-global-actions .hint {
+      font-size: 11px;
+    }
+    /* Schema checkbox */
+    .schema-checkbox {
+      width: 14px;
+      height: 14px;
+      accent-color: var(--accent);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    /* Schema action bar */
+    .schema-action-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px;
+      border-top: 1px solid var(--border);
+      background: rgba(255,255,255,.02);
+    }
+    .schema-action-bar .selection-count {
+      font-size: 12px;
+      color: var(--muted);
+      margin-right: auto;
+    }
+    .schema-action-bar .btn {
+      font-size: 12px;
+    }
+    .schema-action-bar .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    /* Schema expand button (simplified - text only) */
+    .schema-expand-btn {
+      font-size: 10px;
+      padding: 2px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      opacity: 0.6;
+      transition: opacity 0.15s;
+    }
+    .schema-expand-btn:hover {
+      opacity: 1;
+    }
+    /* Schema action bar conditional display */
+    .schema-action-bar.no-selection .selection-count,
+    .schema-action-bar.no-selection #addToSavedBtn,
+    .schema-action-bar.no-selection #deleteSelectedBtn {
+      display: none;
+    }
+    /* Action hint styling */
+    .schema-action-bar .action-hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-right: auto;
+    }
+    .schema-action-bar:not(.no-selection) .action-hint {
+      display: none;
+    }
+
+    /* Schema Context Display */
+    .schema-context {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      margin: 8px 0;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 12px;
+    }
+
+    .schema-context .context-label {
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .schema-context .context-content {
+      flex: 1;
+      color: var(--text);
+    }
+
+    .schema-context .context-clear-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 2px 6px;
+      font-size: 14px;
+    }
+
+    .schema-context .context-clear-btn:hover {
+      color: var(--text);
+    }
+  </style>
+</head>
+
+<body class="dark">
+  <div class="app" id="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-brand" id="homeBtn" title="Go to Home">SB</div>
+      <button class="account-btn" id="accountBtn" title="Account">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+        </svg>
+      </button>
+    </header>
+
+    <!-- Left rail -->
+    <aside class="rail">
+      <button class="icon-btn active" data-mode="data" title="Explorer">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
+        </svg>
+        <span class="tooltip">Explorer</span>
+      </button>
+      <button class="icon-btn" data-mode="schema" title="Schema">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+        </svg>
+        <span class="tooltip">Schema</span>
+      </button>
+      <button class="icon-btn" data-mode="work" title="Workspace">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 01-.657.643 48.39 48.39 0 01-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 01-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 00-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 01-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 00.657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 01-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 005.427-.63 48.05 48.05 0 00.582-4.717.532.532 0 00-.533-.57v0c-.355 0-.676.186-.959.401-.29.221-.634.349-1.003.349-1.035 0-1.875-1.007-1.875-2.25s.84-2.25 1.875-2.25c.37 0 .713.128 1.003.349.283.215.604.401.96.401v0a.656.656 0 00.658-.663 48.422 48.422 0 00-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 01-.61-.58v0z" />
+        </svg>
+        <span class="tooltip">Workspace</span>
+      </button>
+      <button class="icon-btn" data-mode="settings" title="Settings">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        <span class="tooltip">Settings</span>
+      </button>
+
+      <div class="rail-spacer"></div>
+
+      <div class="rail-bottom">
+        <!-- Dark/Light Mode toggle -->
+        <button class="mode-toggle" id="modeToggle" title="Toggle theme">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="sun-icon">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+          </svg>
+          <span class="tooltip">Toggle Light/Dark</span>
+        </button>
+
+        <!-- Context Panel toggle -->
+        <button class="panel-toggle" id="panelToggle" title="Toggle context panel">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5" />
+          </svg>
+          <span class="tooltip">Toggle Panel</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Context panel -->
+    <section class="context" id="context">
+      <div class="ctx-header">
+        <div>
+          <div class="ctx-title" id="ctxTitle">Data</div>
+          <div class="ctx-sub" id="ctxSub">Select or upload datasets, then preview structure.</div>
+        </div>
+      </div>
+
+      <!-- Tabs (only shown for Data in this mock) -->
+      <div class="tabs" id="dataTabs">
+        <div class="tab active" data-tab="explorer">Explorer</div>
+        <div class="tab" data-tab="files">Files</div>
+      </div>
+
+      <!-- Explorer panel -->
+      <div class="panel active" id="panel-explorer">
+        <div class="search">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+          </svg>
+          <input id="companySearch" placeholder="Search company…" />
+        </div>
+
+        <div class="section" style="margin-top:12px;">
+          <div class="section-h">
+            <span>Companies</span>
+          </div>
+          <div class="list" id="companyList"></div>
+        </div>
+
+        <div class="section">
+          <div class="section-h">
+            <span>Selected Data Sources</span>
+          </div>
+          <div class="source-list" id="sourceList">
+            <div class="source-empty">
+              회사를 선택하고 데이터 소스를 추가하세요.
+            </div>
+          </div>
+          <div class="source-action-bar no-selection" id="sourceActionBar" style="display: none;">
+            <span class="selection-count">0개 선택됨</span>
+            <span class="action-hint">소스를 선택하여 관리</span>
+            <button class="btn" id="editSelectedSourcesBtn" disabled>편집</button>
+            <button class="btn primary" id="applySourcesBtn">적용</button>
+            <button class="btn delete-selected-btn" id="deleteSelectedSourcesBtn" disabled>선택 삭제</button>
+          </div>
+          <div class="preview" id="sourcePreviewActions" style="display: none;">
+            <div class="actions">
+              <button class="btn primary" id="btnGoSchema">Next: Schema</button>
+            </div>
+            <div class="hint">
+              Flow: 회사 선택 → 소스 선택 → Next: Schema
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Files panel -->
+      <div class="panel" id="panel-files">
+        <div class="dropzone" id="dropzone">
+          <strong>Upload a file</strong>
+          <small>CSV/JSON mock. Upload completes → auto-switch to Explorer.</small>
+          <div class="file-row">
+            <label class="fake-file" for="fileInput">Choose file…</label>
+            <button class="btn" id="btnMockUpload">Mock upload</button>
+          </div>
+          <input id="fileInput" type="file" accept=".csv,.json" />
+        </div>
+
+        <div class="section" style="margin-top:12px;">
+          <div class="section-h">
+            <span>Recent uploads</span>
+            <span class="badge" id="uploadCount">0</span>
+          </div>
+          <div class="list" id="uploadList"></div>
+        </div>
+      </div>
+
+      <!-- Schema Tabs -->
+      <div class="tabs" id="schemaTabs" style="display:none;">
+        <div class="tab active" data-schema-tab="current">Current</div>
+        <div class="tab" data-schema-tab="saved">Saved</div>
+      </div>
+
+      <!-- Schema Current panel -->
+      <div class="panel" id="panel-schema-current" style="display:none;">
+        <div class="search">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+          </svg>
+          <input id="schemaSearch" placeholder="Search schema..." />
+        </div>
+
+        <!-- 선택 컨텍스트 표시 영역 -->
+        <div id="schemaContext" class="schema-context" style="display:none;">
+          <div class="context-label">선택된 소스:</div>
+          <div class="context-content" id="schemaContextContent"></div>
+          <button class="context-clear-btn" id="clearSchemaContext">×</button>
+        </div>
+
+        <div class="section" style="margin-top:12px;">
+          <div class="section-h">
+            <span>Schemas</span>
+            <span class="badge"><span id="schemaCount">0</span> results</span>
+          </div>
+          <div class="list" id="schemaList"></div>
+        </div>
+
+        <div class="schema-action-bar">
+          <span class="selection-count">0개 선택됨</span>
+          <span class="action-hint">Select schemas to manage</span>
+          <button class="btn" id="addToSavedBtn" disabled>Saved에 추가</button>
+          <button class="btn" id="deleteSelectedBtn" disabled>삭제</button>
+          <button class="btn primary" id="applySchemaBtn">적용</button>
+        </div>
+      </div>
+
+      <!-- Schema Saved panel -->
+      <div class="panel" id="panel-schema-saved" style="display:none;">
+        <div class="search">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+          </svg>
+          <input id="savedSchemaSearch" placeholder="Search saved schemas..." />
+        </div>
+
+        <div class="section" style="margin-top:12px;">
+          <div class="section-h">
+            <span>Saved Schemas</span>
+            <span class="badge"><span id="savedSchemaCount">0</span></span>
+          </div>
+          <div class="list" id="savedSchemaList"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main canvas -->
+    <main class="main">
+      <div class="canvas">
+        <h2>Main Canvas</h2>
+        <p>
+          여기는 차트/문서 결과 영역(placeholder).<br/>
+          좌측 아이콘 = 모드 전환, 우측 패널 = 해당 모드의 작업(Explorer/Files).
+        </p>
+
+        <div style="text-align: center; margin: 40px 0;">
+          <div style="font-family: 'Brush Script MT', 'Segoe Script', cursive; color: #E07D3E; font-size: 48px; font-weight: bold; line-height: 1.2;">
+            HAPPY<br/>BIRTHDAY
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // ---- Source Definitions for Tooltips ----
+    const sourceDefinitions = {
+      macro: "거시지표: GDP, 금리, 환율 등 경제 전반의 거시적 데이터",
+      disclosure: "공시보고서: 기업의 사업보고서, 분기보고서 등 공시 자료",
+      legal: "법령정보: 법률, 시행령, 시행규칙 등 법적 규정",
+      research: "논문정보: 학술 논문 및 연구 자료"
+    };
+
+    // ---- Mock data ----
+    const schemas = [
+      { name: "원자재", source: "거시지표", sourceType: "macro", fields: [
+        { name: "date", type: "DATE", definition: "데이터 기준일" },
+        { name: "price", type: "NUMBER", definition: "원자재 가격" },
+        { name: "volume", type: "NUMBER", definition: "거래량" }
+      ]},
+      { name: "원자재", source: "공시보고서", sourceType: "disclosure", fields: [
+        { name: "company", type: "STRING", definition: "회사명" },
+        { name: "material", type: "STRING", definition: "원자재 종류" },
+        { name: "amount", type: "NUMBER", definition: "수량" },
+        { name: "date", type: "DATE", definition: "보고일" }
+      ]},
+      { name: "매출", source: "공시보고서", sourceType: "disclosure", fields: [
+        { name: "company", type: "STRING", definition: "회사명" },
+        { name: "revenue", type: "NUMBER", definition: "매출액" },
+        { name: "quarter", type: "STRING", definition: "분기" }
+      ]},
+      { name: "금리", source: "거시지표", sourceType: "macro", fields: [
+        { name: "date", type: "DATE", definition: "기준일" },
+        { name: "rate", type: "NUMBER", definition: "금리 (%)" },
+        { name: "type", type: "STRING", definition: "금리 유형" }
+      ]},
+      { name: "법인세", source: "법령정보", sourceType: "legal", fields: [
+        { name: "year", type: "NUMBER", definition: "적용 연도" },
+        { name: "rate", type: "NUMBER", definition: "세율 (%)" },
+        { name: "category", type: "STRING", definition: "과세 구분" }
+      ]},
+      { name: "특허출원", source: "논문정보", sourceType: "research", fields: [
+        { name: "patent_id", type: "STRING", definition: "특허 번호" },
+        { name: "title", type: "STRING", definition: "발명 명칭" },
+        { name: "applicant", type: "STRING", definition: "출원인" },
+        { name: "date", type: "DATE", definition: "출원일" }
+      ]},
+    ];
+
+    let savedSchemas = []; // 저장된 스키마 목록
+    let expandedSchemaIndex = null; // Track which schema's detail is expanded
+    let selectedSchemaIndices = new Set(); // 선택된 스키마 인덱스들
+
+    const companies = [
+      { name: "Samsung Electronics", datasets: 6, schema: { date:"YYYY-MM", company:"string", value:"number" } },
+      { name: "Hyundai Motor", datasets: 6, schema: { date:"YYYY-MM", company:"string", value:"number" } },
+      { name: "LG Energy Solution", datasets: 6, schema: { date:"YYYY-MM", company:"string", value:"number" } },
+      { name: "Kakao", datasets: 6, schema: { date:"YYYY-MM", company:"string", value:"number" } },
+      { name: "Naver", datasets: 6, schema: { date:"YYYY-MM", company:"string", value:"number" } },
+      { name: "POSCO", datasets: 6, schema: { date:"YYYY-MM", company:"string", value:"number" } },
+    ];
+
+    // Data sources available for selection
+    const dataSources = [
+      { id: 'disclosure', name: '공시보고서', icon: '📄' },
+      { id: 'macro', name: '거시지표', icon: '📊' },
+      { id: 'legal', name: '법령정보', icon: '⚖️' },
+      { id: 'research', name: '논문정보', icon: '📚' },
+      { id: 'patent', name: '특허정보', icon: '💡' },
+      { id: 'registry', name: '등기정보', icon: '🏢' },
+    ];
+
+    let selected = null;
+    let uploads = [];
+    let contextPanelVisible = true;
+    let selectedSources = [];  // Array of { sourceId, companyName }
+    let expandedCompany = null; // Track which company's accordion is expanded
+    let selectedSourceIndices = new Set(); // 선택된 소스 인덱스 추적
+
+    // ---- Helpers ----
+    const $ = (sel) => document.querySelector(sel);
+    const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+    function renderCompanies(filter="") {
+      const list = $("#companyList");
+      list.innerHTML = "";
+      const q = filter.trim().toLowerCase();
+
+      const filtered = companies.filter(c => c.name.toLowerCase().includes(q));
+
+      filtered.forEach(c => {
+        const wrapper = document.createElement("div");
+        wrapper.className = "company-item-wrapper";
+        const isExpanded = expandedCompany === c.name;
+
+        const row = document.createElement("div");
+        row.className = "item" + (selected?.name === c.name ? " active" : "");
+        row.innerHTML = `
+          <div>
+            <div style="font-size:13px; font-weight:600;">${c.name}</div>
+            <div class="meta">${c.datasets} datasets</div>
+          </div>
+          <span class="badge select-btn${isExpanded ? ' expanded' : ''}">${isExpanded ? '▲' : '▼'}</span>
+        `;
+
+        // Create expand section (accordion)
+        const expandSection = document.createElement("div");
+        expandSection.className = "source-expand" + (isExpanded ? " open" : "");
+        expandSection.innerHTML = `
+          <div class="source-checkbox-grid">
+            ${dataSources.map(s => {
+              const isSelected = selectedSources.some(sel => sel.sourceId === s.id && sel.companyName === c.name);
+              return `
+                <label class="source-checkbox-item" data-source-id="${s.id}">
+                  <input type="checkbox" ${isSelected ? 'checked' : ''} />
+                  <span>${s.name}</span>
+                </label>
+              `;
+            }).join('')}
+          </div>
+          <div class="source-expand-actions">
+            <button class="btn primary confirm-btn">확인</button>
+          </div>
+        `;
+
+        const selectBtn = row.querySelector(".select-btn");
+        selectBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          toggleSourceExpand(c.name);
+        });
+
+        // Confirm button handler
+        expandSection.querySelector(".confirm-btn").addEventListener("click", (e) => {
+          e.stopPropagation();
+
+          // Remove existing sources for this company
+          selectedSources = selectedSources.filter(s => s.companyName !== c.name);
+
+          // Add newly selected sources
+          expandSection.querySelectorAll(".source-checkbox-item").forEach(item => {
+            const checkbox = item.querySelector("input");
+            if (checkbox.checked) {
+              const sourceId = item.dataset.sourceId;
+              const source = dataSources.find(s => s.id === sourceId);
+              selectedSources.push({
+                sourceId: sourceId,
+                sourceName: source.name,
+                sourceIcon: source.icon,
+                companyName: c.name
+              });
+            }
+          });
+
+          expandedCompany = null;
+          renderCompanies($("#companySearch").value);
+          renderSelectedSources();
+        });
+
+        row.addEventListener("click", () => {
+          selected = { type:"company", name:c.name, schema:c.schema };
+          renderCompanies($("#companySearch").value);
+        });
+
+        wrapper.appendChild(row);
+        wrapper.appendChild(expandSection);
+        list.appendChild(wrapper);
+      });
+    }
+
+    function toggleSourceExpand(companyName) {
+      // If same company clicked, close it; otherwise open new one (accordion behavior)
+      if (expandedCompany === companyName) {
+        expandedCompany = null;
+      } else {
+        expandedCompany = companyName;
+      }
+      renderCompanies($("#companySearch").value);
+    }
+
+    function renderSelectedSources() {
+      const list = $("#sourceList");
+      const actionsSection = $("#sourcePreviewActions");
+      const actionBar = $("#sourceActionBar");
+
+      // Clear selected indices when re-rendering
+      selectedSourceIndices.clear();
+
+      if (selectedSources.length === 0) {
+        list.innerHTML = `
+          <div class="source-empty">
+            회사를 선택하고 데이터 소스를 추가하세요.
+          </div>
+        `;
+        actionsSection.style.display = "none";
+        actionBar.style.display = "none";
+        return;
+      }
+
+      list.innerHTML = selectedSources.map((s, index) => `
+        <div class="source-card" data-index="${index}">
+          <input type="checkbox" class="source-card-checkbox" data-index="${index}" />
+          <div class="source-card-info">
+            <div>
+              <div class="source-card-name">${s.sourceName}</div>
+              <div class="meta" style="font-size:11px;">${s.companyName}</div>
+            </div>
+          </div>
+          <div class="source-card-actions">
+            <button class="source-card-btn detail-btn">상세</button>
+            <button class="source-card-btn edit-btn">스키마</button>
+          </div>
+        </div>
+      `).join('');
+
+      actionsSection.style.display = "block";
+      actionBar.style.display = "flex";
+      updateSourceActionBar();
+
+      // Add event listeners
+      list.querySelectorAll(".source-card").forEach(card => {
+        const index = parseInt(card.dataset.index);
+
+        // Checkbox change event
+        card.querySelector(".source-card-checkbox").addEventListener("change", (e) => {
+          e.stopPropagation();
+          const idx = parseInt(e.target.dataset.index);
+          if (e.target.checked) {
+            selectedSourceIndices.add(idx);
+          } else {
+            selectedSourceIndices.delete(idx);
+          }
+          updateSourceActionBar();
+        });
+
+        card.querySelector(".detail-btn").addEventListener("click", (e) => {
+          e.stopPropagation();
+          showSourceDetail(selectedSources[index]);
+        });
+
+        card.querySelector(".edit-btn").addEventListener("click", (e) => {
+          e.stopPropagation();
+          goToSchemaWithFilter(selectedSources[index].sourceName);
+        });
+      });
+    }
+
+    function updateSourceActionBar() {
+      const count = selectedSourceIndices.size;
+      const actionBar = $("#sourceActionBar");
+      const selectionCount = actionBar.querySelector(".selection-count");
+      const deleteBtn = $("#deleteSelectedSourcesBtn");
+      const editBtn = $("#editSelectedSourcesBtn");
+
+      selectionCount.textContent = `${count}개 선택됨`;
+      deleteBtn.disabled = count === 0;
+      editBtn.disabled = count === 0;
+      actionBar.classList.toggle("no-selection", count === 0);
+    }
+
+    function goToSchemaWithFilter(sourceName) {
+      // 1. Schema 모드로 전환
+      setMode("schema");
+
+      // 2. Current 탭 활성화
+      setSchemaTab("current");
+
+      // 3. 검색 필터에 소스 이름 설정
+      $("#schemaSearch").value = sourceName;
+
+      // 4. 필터링된 스키마 렌더링
+      renderSchemas(sourceName);
+    }
+
+    function goToSchemaWithContext(sources) {
+      // 1. Schema 모드로 전환
+      setMode("schema");
+
+      // 2. Current 탭 활성화
+      setSchemaTab("current");
+
+      // 3. 컨텍스트 정보 표시 (회사 + 출처)
+      const contextEl = $("#schemaContext");
+      const contextContent = $("#schemaContextContent");
+
+      // 회사별로 그룹화하여 표시
+      const grouped = {};
+      sources.forEach(s => {
+        if (!grouped[s.companyName]) grouped[s.companyName] = [];
+        grouped[s.companyName].push(s.sourceName);
+      });
+
+      const contextText = Object.entries(grouped)
+        .map(([company, sourceList]) => `${company}: ${sourceList.join(", ")}`)
+        .join(" | ");
+
+      contextContent.textContent = contextText;
+      contextEl.style.display = "flex";
+
+      // 4. 검색 필터 비우기 (컨텍스트가 대신 표시됨)
+      $("#schemaSearch").value = "";
+
+      // 5. 출처로 필터링된 스키마 렌더링
+      const sourceNames = [...new Set(sources.map(s => s.sourceName))];
+      renderSchemasMultiple(sourceNames);
+    }
+
+    function renderSchemasMultiple(sourceNames) {
+      const list = $("#schemaList");
+      list.innerHTML = "";
+
+      // 출처명 배열을 소문자로 변환
+      const sources = sourceNames.map(s => s.toLowerCase());
+
+      // 해당 출처들에 속하는 스키마 필터링
+      const filtered = schemas.filter(s =>
+        sources.some(source => s.source.toLowerCase() === source)
+      );
+
+      $("#schemaCount").textContent = filtered.length;
+
+      if (filtered.length === 0) {
+        list.innerHTML = `<div class="schema-empty">검색 결과가 없습니다.</div>`;
+        updateActionBar();
+        return;
+      }
+
+      filtered.forEach((schema, index) => {
+        const originalIndex = schemas.indexOf(schema);
+        const isExpanded = expandedSchemaIndex === originalIndex;
+        const isChecked = selectedSchemaIndices.has(originalIndex);
+        const tooltipText = sourceDefinitions[schema.sourceType] || schema.source;
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "schema-item-wrapper";
+
+        const row = document.createElement("div");
+        row.className = "schema-item";
+        row.innerHTML = `
+          <input type="checkbox" class="schema-checkbox" data-index="${originalIndex}" ${isChecked ? 'checked' : ''} />
+          <div class="schema-item-info">
+            <span class="schema-item-name">${schema.name}</span>
+            <span class="schema-source-tag ${schema.sourceType}">
+              ${schema.source.slice(0,2)}
+              <span class="source-tooltip">${tooltipText}</span>
+            </span>
+          </div>
+          <button class="schema-expand-btn">${isExpanded ? '▲' : '▼'}</button>
+        `;
+
+        const detailSection = document.createElement("div");
+        detailSection.className = "schema-detail" + (isExpanded ? " open" : "");
+        detailSection.innerHTML = `
+          <div class="schema-detail-header">필드 구조 (${schema.fields.length}개)</div>
+          <div class="schema-field-list">
+            ${schema.fields.map((f, fieldIndex) => `
+              <div class="schema-field-item" data-field-index="${fieldIndex}">
+                <input class="field-name-input" value="${f.name}" placeholder="필드명" data-field-index="${fieldIndex}" />
+                <input class="field-def-input" value="${f.definition || ''}" placeholder="필드 정의..." data-field-index="${fieldIndex}" />
+                <button class="field-delete-btn" data-field-index="${fieldIndex}">×</button>
+              </div>
+            `).join('')}
+          </div>
+          <div class="schema-edit-actions">
+            <button class="btn add-field-btn">+ 필드 추가</button>
+          </div>
+        `;
+
+        // Checkbox change event
+        row.querySelector(".schema-checkbox").addEventListener("change", (e) => {
+          e.stopPropagation();
+          const idx = parseInt(e.target.dataset.index);
+          if (e.target.checked) {
+            selectedSchemaIndices.add(idx);
+          } else {
+            selectedSchemaIndices.delete(idx);
+          }
+          updateActionBar();
+        });
+
+        // Expand button event
+        row.querySelector(".schema-expand-btn").addEventListener("click", (e) => {
+          e.stopPropagation();
+          expandedSchemaIndex = expandedSchemaIndex === originalIndex ? null : originalIndex;
+          renderSchemasMultiple(sourceNames);
+        });
+
+        // Field editing event listeners (only add if expanded)
+        if (isExpanded) {
+          detailSection.querySelectorAll(".field-name-input").forEach(input => {
+            input.addEventListener("change", (e) => {
+              const fieldIndex = parseInt(e.target.dataset.fieldIndex);
+              updateField(originalIndex, fieldIndex, e.target.value, null);
+            });
+          });
+
+          detailSection.querySelectorAll(".field-def-input").forEach(input => {
+            input.addEventListener("change", (e) => {
+              const fieldIndex = parseInt(e.target.dataset.fieldIndex);
+              updateFieldDefinition(originalIndex, fieldIndex, e.target.value);
+            });
+          });
+
+          detailSection.querySelectorAll(".field-delete-btn").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+              e.stopPropagation();
+              const fieldIndex = parseInt(e.target.dataset.fieldIndex);
+              deleteField(originalIndex, fieldIndex);
+              renderSchemasMultiple(sourceNames);
+            });
+          });
+
+          detailSection.querySelector(".add-field-btn").addEventListener("click", (e) => {
+            e.stopPropagation();
+            addField(originalIndex);
+            renderSchemasMultiple(sourceNames);
+          });
+        }
+
+        wrapper.appendChild(row);
+        wrapper.appendChild(detailSection);
+        list.appendChild(wrapper);
+      });
+
+      updateActionBar();
+    }
+
+    function showSourceDetail(source) {
+      alert(`상세보기:\n\n소스: ${source.sourceName}\n회사: ${source.companyName}\n\n(상세 정보는 실제 구현 시 모달이나 확장 패널로 표시됩니다)`);
+    }
+
+    function renderUploads() {
+      const list = $("#uploadList");
+      list.innerHTML = "";
+      $("#uploadCount").textContent = uploads.length;
+
+      if (uploads.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "item";
+        empty.style.cursor = "default";
+        empty.innerHTML = `<div class="meta">No uploads yet</div>`;
+        list.appendChild(empty);
+        return;
+      }
+
+      uploads.slice().reverse().forEach(u => {
+        const row = document.createElement("div");
+        row.className = "item";
+        row.innerHTML = `
+          <div>
+            <div style="font-size:13px; font-weight:600;">${u.filename}</div>
+            <div class="meta">${u.kind} • just now</div>
+          </div>
+          <span class="badge">Preview</span>
+        `;
+        row.addEventListener("click", () => {
+          selectDataset({ type:"upload", name:u.filename, schema:u.schema });
+          setTab("explorer");
+        });
+        list.appendChild(row);
+      });
+    }
+
+    function selectDataset(ds) {
+      selected = ds;
+      renderCompanies($("#companySearch").value);
+    }
+
+    function setTab(tabName){
+      $$(".tab[data-tab]").forEach(t => t.classList.toggle("active", t.dataset.tab === tabName));
+      $("#panel-explorer").classList.toggle("active", tabName === "explorer");
+      $("#panel-files").classList.toggle("active", tabName === "files");
+    }
+
+    function setSchemaTab(tabName){
+      $$(".tab[data-schema-tab]").forEach(t => t.classList.toggle("active", t.dataset.schemaTab === tabName));
+      $("#panel-schema-current").classList.toggle("active", tabName === "current");
+      $("#panel-schema-saved").classList.toggle("active", tabName === "saved");
+    }
+
+    function renderSchemas(filter="") {
+      const list = $("#schemaList");
+      list.innerHTML = "";
+      const q = filter.trim().toLowerCase();
+
+      // 검색어가 없으면 플레이스홀더 표시
+      if (q === "") {
+        list.innerHTML = `<div class="schema-empty">검색창에 '원자재'를 입력해주세요</div>`;
+        $("#schemaCount").textContent = 0;
+        updateActionBar();
+        return;
+      }
+
+      const filtered = schemas.filter(s => s.name.toLowerCase().includes(q) || s.source.toLowerCase().includes(q));
+      $("#schemaCount").textContent = filtered.length;
+
+      if (filtered.length === 0) {
+        list.innerHTML = `<div class="schema-empty">검색 결과가 없습니다.</div>`;
+        updateActionBar();
+        return;
+      }
+
+      filtered.forEach((schema, index) => {
+        const originalIndex = schemas.indexOf(schema);
+        const isExpanded = expandedSchemaIndex === originalIndex;
+        const isChecked = selectedSchemaIndices.has(originalIndex);
+        const tooltipText = sourceDefinitions[schema.sourceType] || schema.source;
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "schema-item-wrapper";
+
+        const row = document.createElement("div");
+        row.className = "schema-item";
+        row.innerHTML = `
+          <input type="checkbox" class="schema-checkbox" data-index="${originalIndex}" ${isChecked ? 'checked' : ''} />
+          <div class="schema-item-info">
+            <span class="schema-item-name">${schema.name}</span>
+            <span class="schema-source-tag ${schema.sourceType}">
+              ${schema.source.slice(0,2)}
+              <span class="source-tooltip">${tooltipText}</span>
+            </span>
+          </div>
+          <button class="schema-expand-btn">${isExpanded ? '▲' : '▼'}</button>
+        `;
+
+        const detailSection = document.createElement("div");
+        detailSection.className = "schema-detail" + (isExpanded ? " open" : "");
+        detailSection.innerHTML = `
+          <div class="schema-detail-header">필드 구조 (${schema.fields.length}개)</div>
+          <div class="schema-field-list">
+            ${schema.fields.map((f, fieldIndex) => `
+              <div class="schema-field-item" data-field-index="${fieldIndex}">
+                <input class="field-name-input" value="${f.name}" placeholder="필드명" data-field-index="${fieldIndex}" />
+                <input class="field-def-input" value="${f.definition || ''}" placeholder="필드 정의..." data-field-index="${fieldIndex}" />
+                <button class="field-delete-btn" data-field-index="${fieldIndex}">×</button>
+              </div>
+            `).join('')}
+          </div>
+          <div class="schema-edit-actions">
+            <button class="btn add-field-btn">+ 필드 추가</button>
+          </div>
+        `;
+
+        // Checkbox change event
+        row.querySelector(".schema-checkbox").addEventListener("change", (e) => {
+          e.stopPropagation();
+          const idx = parseInt(e.target.dataset.index);
+          if (e.target.checked) {
+            selectedSchemaIndices.add(idx);
+          } else {
+            selectedSchemaIndices.delete(idx);
+          }
+          updateActionBar();
+        });
+
+        // Expand button event
+        row.querySelector(".schema-expand-btn").addEventListener("click", (e) => {
+          e.stopPropagation();
+          expandedSchemaIndex = expandedSchemaIndex === originalIndex ? null : originalIndex;
+          renderSchemas($("#schemaSearch").value);
+        });
+
+        // Field editing event listeners (only add if expanded)
+        if (isExpanded) {
+          detailSection.querySelectorAll(".field-name-input").forEach(input => {
+            input.addEventListener("change", (e) => {
+              const fieldIndex = parseInt(e.target.dataset.fieldIndex);
+              updateField(originalIndex, fieldIndex, e.target.value, null);
+            });
+          });
+
+          detailSection.querySelectorAll(".field-def-input").forEach(input => {
+            input.addEventListener("change", (e) => {
+              const fieldIndex = parseInt(e.target.dataset.fieldIndex);
+              updateFieldDefinition(originalIndex, fieldIndex, e.target.value);
+            });
+          });
+
+          detailSection.querySelectorAll(".field-delete-btn").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+              e.stopPropagation();
+              const fieldIndex = parseInt(e.target.dataset.fieldIndex);
+              deleteField(originalIndex, fieldIndex);
+            });
+          });
+
+          detailSection.querySelector(".add-field-btn").addEventListener("click", (e) => {
+            e.stopPropagation();
+            addField(originalIndex);
+          });
+        }
+
+        wrapper.appendChild(row);
+        wrapper.appendChild(detailSection);
+        list.appendChild(wrapper);
+      });
+
+      updateActionBar();
+    }
+
+    // Update action bar state
+    function updateActionBar() {
+      const count = selectedSchemaIndices.size;
+      const actionBar = $(".schema-action-bar");
+      $(".selection-count").textContent = `${count}개 선택됨`;
+      $("#addToSavedBtn").disabled = count === 0;
+      $("#deleteSelectedBtn").disabled = count === 0;
+      // Toggle no-selection class for conditional display
+      actionBar.classList.toggle("no-selection", count === 0);
+    }
+
+    // Field editing functions
+    function addField(schemaIndex) {
+      schemas[schemaIndex].fields.push({ name: "new_field", type: "STRING", definition: "" });
+      renderSchemas($("#schemaSearch").value);
+    }
+
+    function deleteField(schemaIndex, fieldIndex) {
+      if (schemas[schemaIndex].fields.length > 1) {
+        schemas[schemaIndex].fields.splice(fieldIndex, 1);
+        renderSchemas($("#schemaSearch").value);
+      } else {
+        alert("최소 하나의 필드가 필요합니다.");
+      }
+    }
+
+    function updateField(schemaIndex, fieldIndex, name, type) {
+      if (name !== null) {
+        schemas[schemaIndex].fields[fieldIndex].name = name;
+      }
+      if (type !== null) {
+        schemas[schemaIndex].fields[fieldIndex].type = type;
+      }
+    }
+
+    function updateFieldDefinition(schemaIndex, fieldIndex, definition) {
+      schemas[schemaIndex].fields[fieldIndex].definition = definition;
+    }
+
+    function renderSavedSchemas(filter="") {
+      const list = $("#savedSchemaList");
+      list.innerHTML = "";
+      const q = filter.trim().toLowerCase();
+
+      const filtered = savedSchemas.filter(s => s.name.toLowerCase().includes(q) || s.source.toLowerCase().includes(q));
+      $("#savedSchemaCount").textContent = savedSchemas.length;
+
+      if (filtered.length === 0) {
+        list.innerHTML = `<div class="schema-empty">${savedSchemas.length === 0 ? '저장된 스키마가 없습니다. Current 탭에서 스키마를 추가하세요.' : '검색 결과가 없습니다.'}</div>`;
+        return;
+      }
+
+      filtered.forEach((schema, index) => {
+        const row = document.createElement("div");
+        row.className = "schema-item";
+        row.innerHTML = `
+          <div class="schema-item-info">
+            <span class="schema-item-name">${schema.name}</span>
+            <span class="schema-source-tag ${schema.sourceType}">${schema.source.slice(0,2)}</span>
+          </div>
+          <div class="schema-actions">
+            <button class="schema-action-btn edit-btn">편집</button>
+            <button class="schema-action-btn remove-btn">삭제</button>
+          </div>
+        `;
+
+        row.querySelector(".edit-btn").addEventListener("click", (e) => {
+          e.stopPropagation();
+          alert(`편집: ${schema.name} (${schema.source})\n\n필드: ${schema.fields.map(f => f.name).join(', ')}`);
+        });
+
+        row.querySelector(".remove-btn").addEventListener("click", (e) => {
+          e.stopPropagation();
+          const originalIndex = savedSchemas.findIndex(s => s.name === schema.name && s.source === schema.source);
+          if (originalIndex !== -1) {
+            savedSchemas.splice(originalIndex, 1);
+            renderSavedSchemas($("#savedSchemaSearch").value);
+            renderSchemas($("#schemaSearch").value);
+          }
+        });
+
+        list.appendChild(row);
+      });
+    }
+
+    // ---- Tabs ----
+    $$(".tab[data-tab]").forEach(tab => {
+      tab.addEventListener("click", () => setTab(tab.dataset.tab));
+    });
+
+    $$(".tab[data-schema-tab]").forEach(tab => {
+      tab.addEventListener("click", () => setSchemaTab(tab.dataset.schemaTab));
+    });
+
+    // ---- Search ----
+    $("#companySearch").addEventListener("input", (e) => renderCompanies(e.target.value));
+    $("#schemaSearch").addEventListener("input", (e) => renderSchemas(e.target.value));
+    $("#savedSchemaSearch").addEventListener("input", (e) => renderSavedSchemas(e.target.value));
+
+    // ---- Upload (mock) ----
+    function doUpload(filename="sample.csv", kind="CSV"){
+      const schema = { date:"YYYY-MM", company:"string", value:"number" };
+      uploads.push({ filename, kind, schema });
+
+      renderUploads();
+      selectDataset({ type:"upload", name: filename, schema });
+      setTab("explorer");
+    }
+
+    $("#btnMockUpload").addEventListener("click", () => doUpload("uploaded_mock.csv", "CSV"));
+
+    $("#fileInput").addEventListener("change", (e) => {
+      const f = e.target.files?.[0];
+      if (!f) return;
+      const ext = (f.name.split(".").pop() || "").toUpperCase();
+      doUpload(f.name, ext || "FILE");
+      e.target.value = "";
+    });
+
+    // Drag & drop
+    const dz = $("#dropzone");
+    dz.addEventListener("dragover", (e) => { e.preventDefault(); dz.style.borderColor = "rgba(217,119,87,.7)"; });
+    dz.addEventListener("dragleave", () => { dz.style.borderColor = "rgba(154,166,178,.45)"; });
+    dz.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dz.style.borderColor = "rgba(154,166,178,.45)";
+      const f = e.dataTransfer.files?.[0];
+      if (!f) return;
+      const ext = (f.name.split(".").pop() || "").toUpperCase();
+      doUpload(f.name, ext || "FILE");
+    });
+
+    // ---- Left rail modes ----
+    function setMode(mode){
+      $$(".icon-btn").forEach(b => b.classList.toggle("active", b.dataset.mode === mode));
+
+      const titleMap = {
+        data: { title:"Data", sub:"Select or upload datasets, then preview structure." },
+        schema:{ title:"Schema", sub:"Build and manage schemas." },
+        work:  { title:"Workspace", sub:"Starters and Recent Work (mock)." },
+        settings: { title:"Settings", sub:"Configure application preferences." },
+      };
+      const t = titleMap[mode] || titleMap.data;
+      $("#ctxTitle").textContent = t.title;
+      $("#ctxSub").textContent = t.sub;
+
+      const isData = mode === "data";
+      const isSchema = mode === "schema";
+
+      // Data mode panels
+      $("#dataTabs").style.display = isData ? "flex" : "none";
+      $("#panel-explorer").style.display = isData ? "" : "none";
+      $("#panel-files").style.display = isData ? "" : "none";
+
+      // Schema mode panels
+      $("#schemaTabs").style.display = isSchema ? "flex" : "none";
+      $("#panel-schema-current").style.display = isSchema ? "" : "none";
+      $("#panel-schema-saved").style.display = isSchema ? "" : "none";
+
+      // Initialize schema panels when entering schema mode
+      if (isSchema) {
+        setSchemaTab("current");
+        renderSchemas("");
+        renderSavedSchemas("");
+      }
+    }
+
+    $$(".icon-btn").forEach(btn => {
+      btn.addEventListener("click", () => setMode(btn.dataset.mode));
+    });
+
+    // ---- Theme toggle (light/dark) ----
+    $("#modeToggle").addEventListener("click", () => {
+      document.body.classList.toggle("light");
+      document.body.classList.toggle("dark");
+    });
+
+    // ---- Context Panel toggle ----
+    $("#panelToggle").addEventListener("click", () => {
+      contextPanelVisible = !contextPanelVisible;
+      $("#app").classList.toggle("context-collapsed", !contextPanelVisible);
+      $("#panelToggle").classList.toggle("collapsed", !contextPanelVisible);
+    });
+
+    // ---- Home button ----
+    $("#homeBtn").addEventListener("click", () => {
+      setMode("data");
+      selected = null;
+      selectedSources = [];
+      renderSelectedSources();
+      setTab("explorer");
+      renderCompanies("");
+    });
+
+    // ---- Account button ----
+    $("#accountBtn").addEventListener("click", () => {
+      alert("Account settings (mock)");
+    });
+
+    // ---- Next: Schema button ----
+    $("#btnGoSchema").addEventListener("click", () => {
+      setMode("schema");
+    });
+
+    // ---- Apply Sources button ----
+    $("#applySourcesBtn").addEventListener("click", () => {
+      alert("선택한 데이터 소스가 적용되었습니다.");
+    });
+
+    // ---- Delete Selected Sources button ----
+    $("#deleteSelectedSourcesBtn").addEventListener("click", () => {
+      if (selectedSourceIndices.size === 0) return;
+      if (confirm(`${selectedSourceIndices.size}개 소스를 삭제하시겠습니까?`)) {
+        // Sort indices in descending order to avoid index shift issues
+        [...selectedSourceIndices].sort((a, b) => b - a).forEach(idx => {
+          selectedSources.splice(idx, 1);
+        });
+        selectedSourceIndices.clear();
+        renderSelectedSources();
+      }
+    });
+
+    // ---- Edit Selected Sources button ----
+    $("#editSelectedSourcesBtn").addEventListener("click", () => {
+      if (selectedSourceIndices.size === 0) return;
+
+      // 선택된 소스들의 정보 수집
+      const sources = [...selectedSourceIndices].map(i => selectedSources[i]);
+
+      goToSchemaWithContext(sources);
+    });
+
+    // ---- Clear Schema Context button ----
+    $("#clearSchemaContext").addEventListener("click", () => {
+      $("#schemaContext").style.display = "none";
+      $("#schemaSearch").value = "";
+      renderSchemas("");
+    });
+
+    // ---- Schema Action Bar Buttons ----
+    // Add to Saved
+    $("#addToSavedBtn").addEventListener("click", () => {
+      selectedSchemaIndices.forEach(idx => {
+        const schema = schemas[idx];
+        if (!savedSchemas.some(s => s.name === schema.name && s.source === schema.source)) {
+          savedSchemas.push({ ...schema, fields: schema.fields.map(f => ({...f})) });
+        }
+      });
+      selectedSchemaIndices.clear();
+      renderSchemas($("#schemaSearch").value);
+      renderSavedSchemas($("#savedSchemaSearch").value);
+    });
+
+    // Delete selected
+    $("#deleteSelectedBtn").addEventListener("click", () => {
+      if (confirm(`${selectedSchemaIndices.size}개 스키마를 삭제하시겠습니까?`)) {
+        // Sort indices in descending order to avoid index shift issues
+        [...selectedSchemaIndices].sort((a,b) => b-a).forEach(idx => {
+          schemas.splice(idx, 1);
+        });
+        selectedSchemaIndices.clear();
+        expandedSchemaIndex = null;
+        renderSchemas($("#schemaSearch").value);
+      }
+    });
+
+    // Apply Schema
+    $("#applySchemaBtn").addEventListener("click", () => {
+      alert("스키마 변경사항이 적용되었습니다.");
+      renderSchemas($("#schemaSearch").value);
+    });
+
+    // Init
+    renderCompanies("");
+    renderUploads();
+    renderSchemas("");
+    renderSavedSchemas("");
+    setMode("data");
+  </script>
+</body>
+</html>
