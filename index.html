@@ -658,6 +658,23 @@
       display: none;
     }
 
+    .apply-message {
+      padding: 10px 12px;
+      background: rgba(217,119,87,.1);
+      border-radius: 6px;
+      margin-top: 8px;
+    }
+    .apply-message-text {
+      font-size: 12px;
+      color: var(--accent);
+    }
+    .apply-message.success {
+      background: rgba(76,175,80,.1);
+    }
+    .apply-message.success .apply-message-text {
+      color: #4caf50;
+    }
+
     /* Schema Mode Styles */
     .schema-item {
       padding: 8px 12px;
@@ -1066,6 +1083,14 @@
       font-size: 12px;
     }
 
+    /* Starters empty state */
+    .starters-empty {
+      padding: 20px 12px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
     /* ===== Canvas Block Styles ===== */
     .canvas-blocks {
       display: flex;
@@ -1368,13 +1393,8 @@
             <button class="btn primary" id="applySourcesBtn">적용</button>
             <button class="btn delete-selected-btn" id="deleteSelectedSourcesBtn" disabled>선택 삭제</button>
           </div>
-          <div class="preview" id="sourcePreviewActions" style="display: none;">
-            <div class="actions">
-              <button class="btn primary" id="btnGoSchema">Next: Schema</button>
-            </div>
-            <div class="hint">
-              Flow: 회사 선택 → 소스 선택 → Next: Schema
-            </div>
+          <div class="apply-message" id="applyMessage" style="display: none;">
+            <div class="apply-message-text"></div>
           </div>
         </div>
       </div>
@@ -1457,8 +1477,25 @@
         </div>
       </div>
 
-      <!-- Workspace panel -->
-      <div class="panel" id="panel-workspace" style="display:none;">
+      <!-- Workspace tabs -->
+      <div class="tabs" id="workspaceTabs" style="display:none;">
+        <div class="tab active" data-workspace-tab="starters">Starters</div>
+        <div class="tab" data-workspace-tab="recent">Recent Work</div>
+      </div>
+
+      <!-- Workspace Starters panel -->
+      <div class="panel" id="panel-workspace-starters" style="display:none;">
+        <div class="workspace-container">
+          <div class="workspace-section">
+            <div class="starters-empty">
+              준비 중입니다.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Workspace Recent Work panel -->
+      <div class="panel" id="panel-workspace-recent" style="display:none;">
         <div class="workspace-container">
           <div class="workspace-section">
             <div class="workspace-section-header">
@@ -1652,6 +1689,13 @@
       return new Date(timestamp).toLocaleDateString('ko-KR');
     }
 
+    // Workspace 탭 전환
+    function setWorkspaceTab(tabName) {
+      $$(".tab[data-workspace-tab]").forEach(t => t.classList.toggle("active", t.dataset.workspaceTab === tabName));
+      $("#panel-workspace-starters").classList.toggle("active", tabName === "starters");
+      $("#panel-workspace-recent").classList.toggle("active", tabName === "recent");
+    }
+
     // Workspace UI 렌더링
     function renderWorkspace() {
       const list = $("#recentWorkList");
@@ -1812,7 +1856,6 @@
 
     function renderSelectedSources() {
       const list = $("#sourceList");
-      const actionsSection = $("#sourcePreviewActions");
       const actionBar = $("#sourceActionBar");
 
       // Clear selected indices when re-rendering
@@ -1824,7 +1867,6 @@
             회사를 선택하고 데이터 소스를 추가하세요.
           </div>
         `;
-        actionsSection.style.display = "none";
         actionBar.style.display = "none";
         return;
       }
@@ -1845,7 +1887,6 @@
         </div>
       `).join('');
 
-      actionsSection.style.display = "block";
       actionBar.style.display = "flex";
       updateSourceActionBar();
 
@@ -2425,7 +2466,9 @@
       $("#panel-schema-saved").style.display = isSchema ? "" : "none";
 
       // Workspace mode panels
-      $("#panel-workspace").style.display = isWork ? "block" : "none";
+      $("#workspaceTabs").style.display = isWork ? "flex" : "none";
+      $("#panel-workspace-starters").style.display = isWork ? "" : "none";
+      $("#panel-workspace-recent").style.display = isWork ? "" : "none";
 
       // Initialize schema panels when entering schema mode
       if (isSchema) {
@@ -2436,6 +2479,7 @@
 
       // Initialize workspace when entering work mode
       if (isWork) {
+        setWorkspaceTab("starters");
         renderWorkspace();
       }
     }
@@ -2455,6 +2499,11 @@
       contextPanelVisible = !contextPanelVisible;
       $("#app").classList.toggle("context-collapsed", !contextPanelVisible);
       $("#panelToggle").classList.toggle("collapsed", !contextPanelVisible);
+    });
+
+    // ---- Workspace tabs ----
+    $$(".tab[data-workspace-tab]").forEach(tab => {
+      tab.addEventListener("click", () => setWorkspaceTab(tab.dataset.workspaceTab));
     });
 
     // ---- Recent Work 클릭 시 캔버스에 표시 ----
@@ -2489,14 +2538,41 @@
       alert("Account settings (mock)");
     });
 
-    // ---- Next: Schema button ----
-    $("#btnGoSchema").addEventListener("click", () => {
-      setMode("schema");
-    });
-
     // ---- Apply Sources button ----
+    function showApplyMessage(message, isSuccess = false) {
+      const msgEl = $("#applyMessage");
+      const textEl = msgEl.querySelector(".apply-message-text");
+      textEl.textContent = message;
+      msgEl.classList.toggle("success", isSuccess);
+      msgEl.style.display = "block";
+    }
+
     $("#applySourcesBtn").addEventListener("click", () => {
-      alert("선택한 데이터 소스가 적용되었습니다.");
+      // 체크박스로 선택된 소스 확인
+      const selectedIndices = [...selectedSourceIndices];
+
+      if (selectedIndices.length === 0) {
+        showApplyMessage("소스를 체크박스로 선택해주세요.");
+        return;
+      }
+
+      if (selectedIndices.length > 1) {
+        showApplyMessage("적용은 한 개의 소스만 선택 가능합니다. 하나만 선택해주세요.");
+        return;
+      }
+
+      // 선택된 소스 사용
+      const source = selectedSources[selectedIndices[0]];
+
+      // 해당 소스에 맞는 스키마 찾기
+      const schema = schemas.find(s => s.source === source.sourceName);
+      const schemaName = schema ? schema.name : "데이터";
+
+      // 성공 메시지 표시
+      showApplyMessage(`${source.companyName} - ${source.sourceName} 적용됨`, true);
+
+      // 캔버스에 표시
+      renderCanvas(source.companyName, schemaName, source.sourceName, { showChart: true });
     });
 
     // ---- Delete Selected Sources button ----
