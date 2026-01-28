@@ -972,6 +972,291 @@
       border: 1px solid rgba(20, 184, 166, .3);
       margin-left: 4px;
     }
+
+    /* Workspace Mode Styles */
+    .workspace-container {
+      padding: 8px 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex: 1;
+      overflow: auto;
+    }
+    .workspace-section {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.015);
+      overflow: hidden;
+    }
+    .workspace-section-header {
+      padding: 10px 12px;
+      font-size: 12px;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .recent-work-list {
+      display: flex;
+      flex-direction: column;
+    }
+    .recent-work-item {
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      border-top: 1px solid rgba(31,37,48,.6);
+      color: var(--text);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .recent-work-item:hover {
+      background: rgba(255,255,255,.03);
+    }
+    .recent-work-item.active {
+      background: rgba(217,119,87,.10);
+      border-left: 2px solid var(--accent);
+      padding-left: 10px;
+    }
+    .recent-work-item:first-child {
+      border-top: none;
+    }
+    .recent-work-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      min-width: 0;
+    }
+    .recent-work-company {
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .recent-work-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .recent-work-schema {
+      color: var(--accent);
+    }
+    .recent-work-source {
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid var(--border);
+    }
+    .recent-work-time {
+      font-size: 10px;
+      color: var(--muted);
+      opacity: 0.7;
+    }
+    .recent-work-empty {
+      padding: 20px 12px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    /* ===== Canvas Block Styles ===== */
+    .canvas-blocks {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      flex: 1;
+      overflow-y: auto;
+      padding: 4px;
+    }
+    .canvas-block {
+      background: rgba(255,255,255,.02);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .canvas-block:hover {
+      border-color: rgba(217,119,87,.3);
+      background: rgba(255,255,255,.03);
+    }
+    .block-label {
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    /* Title Block */
+    .block-title-content {
+      font-size: 18px;
+      font-weight: 400;
+      color: var(--text);
+      letter-spacing: -0.2px;
+    }
+    .block-title-content .company-name {
+      color: var(--accent);
+    }
+    .block-title-content .schema-name {
+      color: var(--text);
+      margin-left: 6px;
+    }
+    .block-title-content .separator {
+      color: var(--muted);
+      margin: 0 4px;
+    }
+
+    /* Info Block */
+    .block-info-text {
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* Table Block */
+    .block-table-wrapper {
+      overflow-x: auto;
+    }
+    .block-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    .block-table th {
+      text-align: left;
+      padding: 8px 10px;
+      font-weight: 500;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,.02);
+    }
+    .block-table td {
+      padding: 8px 10px;
+      color: var(--text);
+      border-bottom: 1px solid rgba(31,37,48,.5);
+      font-weight: 400;
+    }
+    .block-table tr:nth-child(even) td {
+      background: rgba(255,255,255,.015);
+    }
+    .block-table tr:hover td {
+      background: rgba(217,119,87,.05);
+    }
+
+    /* Chart Block */
+    .block-chart {
+      min-height: 200px;
+      position: relative;
+    }
+    .chart-container {
+      width: 100%;
+      height: 180px;
+      position: relative;
+    }
+    .chart-container svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+    .chart-area {
+      fill: url(#areaGradient);
+      opacity: 0;
+      animation: fadeInChart 1s ease forwards;
+    }
+    .chart-line {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 1000;
+      animation: drawLine 1.5s ease forwards;
+    }
+    .chart-point {
+      fill: var(--accent);
+      stroke: var(--bg);
+      stroke-width: 2;
+      cursor: pointer;
+      transition: r 0.15s, fill 0.15s;
+      opacity: 0;
+      animation: fadeInPoint 0.3s ease forwards;
+    }
+    .chart-point:hover {
+      r: 6;
+      fill: #fff;
+    }
+    .chart-grid-line {
+      stroke: var(--border);
+      stroke-width: 1;
+      stroke-dasharray: 4 4;
+    }
+    .chart-axis-label {
+      font-size: 10px;
+      fill: var(--muted);
+      font-weight: 400;
+    }
+    .chart-tooltip {
+      position: absolute;
+      background: rgba(15,18,23,.95);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 11px;
+      color: var(--text);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s;
+      z-index: 10;
+      white-space: nowrap;
+    }
+    .chart-tooltip.visible {
+      opacity: 1;
+    }
+    .chart-tooltip-value {
+      font-weight: 500;
+      color: var(--accent);
+    }
+
+    @keyframes drawLine {
+      to { stroke-dashoffset: 0; }
+    }
+    @keyframes fadeInChart {
+      0% { opacity: 0; }
+      50% { opacity: 0; }
+      100% { opacity: 0.6; }
+    }
+    @keyframes fadeInPoint {
+      to { opacity: 1; }
+    }
+
+    /* Canvas Empty State */
+    .canvas-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--muted);
+      gap: 12px;
+    }
+    .canvas-empty-icon {
+      font-size: 48px;
+      opacity: 0.3;
+    }
+    .canvas-empty-text {
+      font-size: 13px;
+      text-align: center;
+    }
   </style>
 </head>
 
@@ -1171,11 +1456,36 @@
           <div class="list" id="savedSchemaList"></div>
         </div>
       </div>
+
+      <!-- Workspace panel -->
+      <div class="panel" id="panel-workspace" style="display:none;">
+        <div class="workspace-container">
+          <div class="workspace-section">
+            <div class="workspace-section-header">
+              <span>Recent Work</span>
+              <span class="badge" id="recentWorkCount">0</span>
+            </div>
+            <div class="recent-work-list" id="recentWorkList">
+              <div class="recent-work-empty">
+                아직 작업 기록이 없습니다.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- Main canvas -->
     <main class="main">
-      <div class="canvas">
+      <div class="canvas" id="mainCanvas">
+        <div class="canvas-blocks" id="canvasBlocks">
+          <div class="canvas-empty">
+            <div class="canvas-empty-icon">📊</div>
+            <div class="canvas-empty-text">
+              회사를 선택하고 소스를 추가한 후<br>편집 버튼을 클릭하세요.
+            </div>
+          </div>
+        </div>
       </div>
     </main>
   </div>
@@ -1266,6 +1576,139 @@
     let selectedSources = [];  // Array of { sourceId, companyName }
     let expandedCompany = null; // Track which company's accordion is expanded
     let selectedSourceIndices = new Set(); // 선택된 소스 인덱스 추적
+
+    // Recent Works (localStorage에 저장)
+    let recentWorks = [];
+
+    // localStorage에서 불러오기
+    function loadRecentWorks() {
+      try {
+        const stored = localStorage.getItem('recentWorks');
+        if (stored) {
+          recentWorks = JSON.parse(stored);
+        }
+      } catch (e) {
+        console.error('Failed to load recentWorks from localStorage:', e);
+        recentWorks = [];
+      }
+    }
+
+    // localStorage에 저장
+    function saveRecentWorks() {
+      try {
+        localStorage.setItem('recentWorks', JSON.stringify(recentWorks));
+      } catch (e) {
+        console.error('Failed to save recentWorks to localStorage:', e);
+      }
+    }
+
+    // 새 작업 기록 (시작 시점에 1번만)
+    function addRecentWork(companyName, schemaName, sourceName, sourceType) {
+      // 동일한 회사+스키마+출처 조합 찾기
+      const existingIndex = recentWorks.findIndex(w =>
+        w.companyName === companyName &&
+        w.schemaName === schemaName &&
+        w.sourceName === sourceName
+      );
+
+      if (existingIndex !== -1) {
+        // 기존 항목의 timestamp만 업데이트하고 맨 앞으로 이동
+        recentWorks[existingIndex].timestamp = Date.now();
+        const existing = recentWorks.splice(existingIndex, 1)[0];
+        recentWorks.unshift(existing);
+      } else {
+        // 새 항목 추가
+        const newWork = {
+          id: 'work_' + Date.now(),
+          companyName: companyName,
+          schemaName: schemaName,
+          sourceName: sourceName,
+          sourceType: sourceType,
+          timestamp: Date.now()
+        };
+        recentWorks.unshift(newWork);
+
+        // 최대 20개까지만 유지
+        if (recentWorks.length > 20) {
+          recentWorks = recentWorks.slice(0, 20);
+        }
+      }
+
+      saveRecentWorks();
+    }
+
+    // 시간 포맷팅 함수
+    function formatTimeAgo(timestamp) {
+      const now = Date.now();
+      const diff = now - timestamp;
+      const minutes = Math.floor(diff / 60000);
+      const hours = Math.floor(diff / 3600000);
+      const days = Math.floor(diff / 86400000);
+
+      if (minutes < 1) return '방금 전';
+      if (minutes < 60) return `${minutes}분 전`;
+      if (hours < 24) return `${hours}시간 전`;
+      if (days < 7) return `${days}일 전`;
+      return new Date(timestamp).toLocaleDateString('ko-KR');
+    }
+
+    // Workspace UI 렌더링
+    function renderWorkspace() {
+      const list = $("#recentWorkList");
+      const countBadge = $("#recentWorkCount");
+
+      countBadge.textContent = recentWorks.length;
+
+      if (recentWorks.length === 0) {
+        list.innerHTML = `
+          <div class="recent-work-empty">
+            아직 작업 기록이 없습니다.
+          </div>
+        `;
+        return;
+      }
+
+      list.innerHTML = recentWorks.map((work, index) => `
+        <div class="recent-work-item" data-index="${index}">
+          <div class="recent-work-info">
+            <div class="recent-work-company">${work.companyName}</div>
+            <div class="recent-work-meta">
+              <span class="recent-work-schema">${work.schemaName}</span>
+              <span class="recent-work-source">${work.sourceName}</span>
+            </div>
+          </div>
+          <span class="recent-work-time">${formatTimeAgo(work.timestamp)}</span>
+        </div>
+      `).join('');
+    }
+
+    // Recent Work 항목 클릭 시 스키마로 이동
+    function goToSchemaFromRecentWork(work) {
+      // 1. Schema 모드로 전환
+      setMode("schema");
+
+      // 2. Current 탭 활성화
+      setSchemaTab("current");
+
+      // 3. 컨텍스트 설정
+      currentContextSources = [{
+        companyName: work.companyName,
+        sourceName: work.sourceName,
+        sourceType: work.sourceType
+      }];
+
+      // 4. 컨텍스트 정보 표시
+      const contextEl = $("#schemaContext");
+      const contextContent = $("#schemaContextContent");
+      contextContent.textContent = `${work.companyName}: ${work.sourceName}`;
+      contextEl.style.display = "flex";
+
+      // 5. 검색 필터 비우기
+      $("#schemaSearch").value = "";
+
+      // 6. 해당 출처로 필터링된 스키마 렌더링
+      renderSchemasMultiple([work.sourceName]);
+    }
 
     // ---- Helpers ----
     const $ = (sel) => document.querySelector(sel);
@@ -1462,6 +1905,17 @@
     }
 
     function goToSchemaWithContext(sources) {
+      // 작업 기록 추가 (시작 시점에 1번만)
+      sources.forEach(source => {
+        // 해당 출처에 맞는 스키마 찾기 (첫 번째 매칭되는 것 사용)
+        const matchingSchema = schemas.find(s => s.source === source.sourceName);
+        const schemaName = matchingSchema ? matchingSchema.name : source.sourceName;
+        const sourceType = matchingSchema ? matchingSchema.sourceType : source.sourceId || 'unknown';
+        const companyKorean = companyNameKorean[source.companyName] || source.companyName;
+
+        addRecentWork(companyKorean, schemaName, source.sourceName, sourceType);
+      });
+
       // 1. Schema 모드로 전환
       setMode("schema");
 
@@ -1495,6 +1949,15 @@
       // 6. 출처로 필터링된 스키마 렌더링
       const sourceNames = [...new Set(sources.map(s => s.sourceName))];
       renderSchemasMultiple(sourceNames);
+
+      // 7. 캔버스 렌더링 (첫 번째 소스 기준)
+      if (sources.length > 0) {
+        const firstSource = sources[0];
+        const companyKorean = companyNameKorean[firstSource.companyName] || firstSource.companyName;
+        const matchingSchema = schemas.find(s => s.source === firstSource.sourceName);
+        const schemaName = matchingSchema ? matchingSchema.name : firstSource.sourceName;
+        renderCanvas(companyKorean, schemaName, firstSource.sourceName);
+      }
     }
 
     function renderSchemasMultiple(sourceNames) {
@@ -1940,7 +2403,7 @@
       const titleMap = {
         data: { title:"Data", sub:"Select or upload datasets, then preview structure." },
         schema:{ title:"Schema", sub:"Build and manage schemas." },
-        work:  { title:"Workspace", sub:"Starters and Recent Work (mock)." },
+        work:  { title:"Workspace", sub:"Recent Work" },
         settings: { title:"Settings", sub:"Configure application preferences." },
       };
       const t = titleMap[mode] || titleMap.data;
@@ -1949,6 +2412,7 @@
 
       const isData = mode === "data";
       const isSchema = mode === "schema";
+      const isWork = mode === "work";
 
       // Data mode panels
       $("#dataTabs").style.display = isData ? "flex" : "none";
@@ -1960,11 +2424,19 @@
       $("#panel-schema-current").style.display = isSchema ? "" : "none";
       $("#panel-schema-saved").style.display = isSchema ? "" : "none";
 
+      // Workspace mode panels
+      $("#panel-workspace").style.display = isWork ? "block" : "none";
+
       // Initialize schema panels when entering schema mode
       if (isSchema) {
         setSchemaTab("current");
         renderSchemas("");
         renderSavedSchemas("");
+      }
+
+      // Initialize workspace when entering work mode
+      if (isWork) {
+        renderWorkspace();
       }
     }
 
@@ -1983,6 +2455,23 @@
       contextPanelVisible = !contextPanelVisible;
       $("#app").classList.toggle("context-collapsed", !contextPanelVisible);
       $("#panelToggle").classList.toggle("collapsed", !contextPanelVisible);
+    });
+
+    // ---- Recent Work 클릭 시 캔버스에 표시 ----
+    $("#recentWorkList").addEventListener("click", (e) => {
+      const item = e.target.closest(".recent-work-item");
+      if (!item) return;
+
+      const index = parseInt(item.dataset.index);
+      const work = recentWorks[index];
+      if (!work) return;
+
+      // 활성 상태 표시
+      $$(".recent-work-item").forEach(el => el.classList.remove("active"));
+      item.classList.add("active");
+
+      // 캔버스에 작업 내용 표시 (차트 없이)
+      renderCanvas(work.companyName, work.schemaName, work.sourceName, { showChart: false });
     });
 
     // ---- Home button ----
@@ -2074,7 +2563,337 @@
       renderSchemas($("#schemaSearch").value);
     });
 
+    // ===== Mock Company Data for Canvas =====
+    const mockCompanyData = {
+      "삼성전자": {
+        "원자재": {
+          info: "삼성전자의 반도체 및 디스플레이 생산에 필요한 주요 원자재 현황입니다. 실리콘 웨이퍼, 희귀금속, 화학소재 등의 조달 및 가격 변동을 추적합니다.",
+          data: [
+            { date: "2024-01", material: "실리콘웨이퍼", amount: 15000, price: 450000 },
+            { date: "2024-02", material: "실리콘웨이퍼", amount: 16200, price: 465000 },
+            { date: "2024-03", material: "실리콘웨이퍼", amount: 14800, price: 440000 },
+            { date: "2024-04", material: "실리콘웨이퍼", amount: 17500, price: 485000 },
+            { date: "2024-05", material: "실리콘웨이퍼", amount: 18200, price: 510000 },
+            { date: "2024-06", material: "실리콘웨이퍼", amount: 19100, price: 525000 }
+          ]
+        },
+        "매출": {
+          info: "삼성전자의 분기별 매출 현황입니다. 반도체, 디스플레이, 모바일, 가전 등 사업부별 매출 데이터를 포함합니다.",
+          data: [
+            { date: "2023-Q1", revenue: 63450000, quarter: "2023 Q1" },
+            { date: "2023-Q2", revenue: 60010000, quarter: "2023 Q2" },
+            { date: "2023-Q3", revenue: 67400000, quarter: "2023 Q3" },
+            { date: "2023-Q4", revenue: 67780000, quarter: "2023 Q4" },
+            { date: "2024-Q1", revenue: 71920000, quarter: "2024 Q1" },
+            { date: "2024-Q2", revenue: 74070000, quarter: "2024 Q2" }
+          ]
+        }
+      },
+      "현대자동차": {
+        "원자재": {
+          info: "현대자동차의 차량 생산에 필요한 주요 원자재 현황입니다. 철강, 알루미늄, 리튬, 반도체 등의 조달 데이터를 추적합니다.",
+          data: [
+            { date: "2024-01", material: "철강코일", amount: 85000, price: 920000 },
+            { date: "2024-02", material: "철강코일", amount: 88000, price: 945000 },
+            { date: "2024-03", material: "철강코일", amount: 82000, price: 890000 },
+            { date: "2024-04", material: "철강코일", amount: 91000, price: 970000 },
+            { date: "2024-05", material: "철강코일", amount: 95000, price: 1010000 },
+            { date: "2024-06", material: "철강코일", amount: 93000, price: 985000 }
+          ]
+        },
+        "매출": {
+          info: "현대자동차의 분기별 매출 현황입니다. 국내, 해외, EV 등 부문별 매출 데이터를 포함합니다.",
+          data: [
+            { date: "2023-Q1", revenue: 37780000, quarter: "2023 Q1" },
+            { date: "2023-Q2", revenue: 42100000, quarter: "2023 Q2" },
+            { date: "2023-Q3", revenue: 40220000, quarter: "2023 Q3" },
+            { date: "2023-Q4", revenue: 43150000, quarter: "2023 Q4" },
+            { date: "2024-Q1", revenue: 40980000, quarter: "2024 Q1" },
+            { date: "2024-Q2", revenue: 45350000, quarter: "2024 Q2" }
+          ]
+        }
+      },
+      "LG에너지솔루션": {
+        "원자재": {
+          info: "LG에너지솔루션의 배터리 생산에 필요한 핵심 원자재 현황입니다. 리튬, 코발트, 니켈, 망간 등의 조달 및 가격 추이를 추적합니다.",
+          data: [
+            { date: "2024-01", material: "리튬", amount: 2500, price: 78000000 },
+            { date: "2024-02", material: "리튬", amount: 2800, price: 72000000 },
+            { date: "2024-03", material: "리튬", amount: 3100, price: 65000000 },
+            { date: "2024-04", material: "리튬", amount: 2900, price: 68000000 },
+            { date: "2024-05", material: "리튬", amount: 3300, price: 71000000 },
+            { date: "2024-06", material: "리튬", amount: 3500, price: 75000000 }
+          ]
+        }
+      }
+    };
+
+    // Default data for companies/schemas not in mockCompanyData
+    function getDefaultData(schemaName) {
+      if (schemaName === "원자재") {
+        return {
+          info: "해당 회사의 원자재 조달 및 관리 현황입니다. 주요 원자재의 가격 변동과 수량을 추적합니다.",
+          data: [
+            { date: "2024-01", material: "기본자재", amount: 10000, price: 100000 },
+            { date: "2024-02", material: "기본자재", amount: 11000, price: 105000 },
+            { date: "2024-03", material: "기본자재", amount: 10500, price: 102000 },
+            { date: "2024-04", material: "기본자재", amount: 12000, price: 115000 },
+            { date: "2024-05", material: "기본자재", amount: 12500, price: 120000 },
+            { date: "2024-06", material: "기본자재", amount: 13000, price: 125000 }
+          ]
+        };
+      } else if (schemaName === "매출") {
+        return {
+          info: "해당 회사의 분기별 매출 현황입니다.",
+          data: [
+            { date: "2023-Q1", revenue: 10000000, quarter: "2023 Q1" },
+            { date: "2023-Q2", revenue: 11000000, quarter: "2023 Q2" },
+            { date: "2023-Q3", revenue: 10500000, quarter: "2023 Q3" },
+            { date: "2023-Q4", revenue: 12000000, quarter: "2023 Q4" },
+            { date: "2024-Q1", revenue: 12500000, quarter: "2024 Q1" },
+            { date: "2024-Q2", revenue: 13500000, quarter: "2024 Q2" }
+          ]
+        };
+      } else {
+        return {
+          info: `${schemaName} 관련 데이터입니다.`,
+          data: [
+            { date: "2024-01", value: 100 },
+            { date: "2024-02", value: 120 },
+            { date: "2024-03", value: 110 },
+            { date: "2024-04", value: 140 },
+            { date: "2024-05", value: 150 },
+            { date: "2024-06", value: 160 }
+          ]
+        };
+      }
+    }
+
+    // ===== Canvas Rendering Functions =====
+    function renderCanvas(companyName, schemaName, sourceName, options = {}) {
+      const { showChart = true } = options;
+      const container = $("#canvasBlocks");
+
+      // Get data for this company/schema
+      let companyData = mockCompanyData[companyName];
+      let schemaData = companyData ? companyData[schemaName] : null;
+
+      if (!schemaData) {
+        schemaData = getDefaultData(schemaName);
+      }
+
+      // Find schema definition
+      const schemaDef = schemas.find(s => s.name === schemaName && s.source === sourceName);
+      const fields = schemaDef ? schemaDef.fields : [];
+
+      container.innerHTML = `
+        ${renderTitleBlock(companyName, schemaName)}
+        ${renderInfoBlock(schemaData.info)}
+        ${renderTableBlock(fields, schemaData.data)}
+        ${showChart ? renderChartBlock(schemaData.data, schemaName) : ''}
+      `;
+
+      // Animate chart after render
+      if (showChart) {
+        setTimeout(() => animateChartPoints(), 100);
+      }
+    }
+
+    function renderTitleBlock(companyName, schemaName) {
+      return `
+        <div class="canvas-block">
+          <div class="block-label">Document Title</div>
+          <div class="block-title-content">
+            <span class="company-name">${companyName}</span>
+            <span class="separator">·</span>
+            <span class="schema-name">${schemaName}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderInfoBlock(info) {
+      return `
+        <div class="canvas-block">
+          <div class="block-label">Information</div>
+          <div class="block-info-text">${info}</div>
+        </div>
+      `;
+    }
+
+    function renderTableBlock(fields, data) {
+      if (!data || data.length === 0) return '';
+
+      // Get column keys from data
+      const keys = Object.keys(data[0]);
+
+      // Build header - use field definitions if available, otherwise use keys
+      let headerHtml = '<tr>';
+      keys.forEach(key => {
+        const field = fields.find(f => f.name === key);
+        const label = field ? field.name : key;
+        headerHtml += `<th>${label}</th>`;
+      });
+      headerHtml += '</tr>';
+
+      // Build rows
+      let rowsHtml = '';
+      data.forEach(row => {
+        rowsHtml += '<tr>';
+        keys.forEach(key => {
+          let value = row[key];
+          // Format numbers
+          if (typeof value === 'number') {
+            value = value.toLocaleString();
+          }
+          rowsHtml += `<td>${value}</td>`;
+        });
+        rowsHtml += '</tr>';
+      });
+
+      return `
+        <div class="canvas-block">
+          <div class="block-label">Data Table</div>
+          <div class="block-table-wrapper">
+            <table class="block-table">
+              <thead>${headerHtml}</thead>
+              <tbody>${rowsHtml}</tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderChartBlock(data, schemaName) {
+      if (!data || data.length === 0) return '';
+
+      // Determine which numeric field to chart
+      const keys = Object.keys(data[0]);
+      let valueKey = keys.find(k => typeof data[0][k] === 'number' && k !== 'amount');
+      if (!valueKey) valueKey = keys.find(k => typeof data[0][k] === 'number');
+
+      if (!valueKey) return '';
+
+      const values = data.map(d => d[valueKey]);
+      const labels = data.map(d => d.date);
+      const maxValue = Math.max(...values);
+      const minValue = Math.min(...values);
+      const range = maxValue - minValue || 1;
+
+      // SVG dimensions
+      const width = 600;
+      const height = 150;
+      const padding = { top: 10, right: 20, bottom: 30, left: 10 };
+      const chartWidth = width - padding.left - padding.right;
+      const chartHeight = height - padding.top - padding.bottom;
+
+      // Calculate points
+      const points = values.map((v, i) => {
+        const x = padding.left + (i / (values.length - 1)) * chartWidth;
+        const y = padding.top + chartHeight - ((v - minValue) / range) * chartHeight;
+        return { x, y, value: v, label: labels[i] };
+      });
+
+      // Create smooth curve path using bezier
+      let linePath = `M ${points[0].x} ${points[0].y}`;
+      for (let i = 1; i < points.length; i++) {
+        const prev = points[i - 1];
+        const curr = points[i];
+        const cpx = (prev.x + curr.x) / 2;
+        linePath += ` C ${cpx} ${prev.y}, ${cpx} ${curr.y}, ${curr.x} ${curr.y}`;
+      }
+
+      // Create area path
+      let areaPath = linePath;
+      areaPath += ` L ${points[points.length - 1].x} ${height - padding.bottom}`;
+      areaPath += ` L ${points[0].x} ${height - padding.bottom} Z`;
+
+      // Grid lines (3 horizontal)
+      let gridLines = '';
+      for (let i = 0; i <= 2; i++) {
+        const y = padding.top + (i / 2) * chartHeight;
+        gridLines += `<line class="chart-grid-line" x1="${padding.left}" y1="${y}" x2="${width - padding.right}" y2="${y}" />`;
+      }
+
+      // X-axis labels
+      let xLabels = '';
+      points.forEach((p, i) => {
+        if (i % 2 === 0 || i === points.length - 1) {
+          xLabels += `<text class="chart-axis-label" x="${p.x}" y="${height - 8}" text-anchor="middle">${p.label}</text>`;
+        }
+      });
+
+      // Data points
+      let pointsHtml = '';
+      points.forEach((p, i) => {
+        const delay = 0.8 + i * 0.1;
+        pointsHtml += `<circle class="chart-point" cx="${p.x}" cy="${p.y}" r="4"
+          data-value="${p.value.toLocaleString()}" data-label="${p.label}"
+          style="animation-delay: ${delay}s" />`;
+      });
+
+      return `
+        <div class="canvas-block block-chart">
+          <div class="block-label">Chart · ${valueKey}</div>
+          <div class="chart-container">
+            <svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet">
+              <defs>
+                <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" style="stop-color: #D97757; stop-opacity: 0.4" />
+                  <stop offset="100%" style="stop-color: #D97757; stop-opacity: 0" />
+                </linearGradient>
+              </defs>
+              ${gridLines}
+              <path class="chart-area" d="${areaPath}" />
+              <path class="chart-line" d="${linePath}" />
+              ${pointsHtml}
+              ${xLabels}
+            </svg>
+            <div class="chart-tooltip" id="chartTooltip"></div>
+          </div>
+        </div>
+      `;
+    }
+
+    function animateChartPoints() {
+      const points = document.querySelectorAll('.chart-point');
+      const tooltip = document.getElementById('chartTooltip');
+
+      if (!tooltip) return;
+
+      points.forEach(point => {
+        point.addEventListener('mouseenter', (e) => {
+          const value = point.getAttribute('data-value');
+          const label = point.getAttribute('data-label');
+          tooltip.innerHTML = `${label}: <span class="chart-tooltip-value">${value}</span>`;
+          tooltip.classList.add('visible');
+
+          const rect = point.getBoundingClientRect();
+          const containerRect = point.closest('.chart-container').getBoundingClientRect();
+          tooltip.style.left = (rect.left - containerRect.left - tooltip.offsetWidth / 2 + 4) + 'px';
+          tooltip.style.top = (rect.top - containerRect.top - 35) + 'px';
+        });
+
+        point.addEventListener('mouseleave', () => {
+          tooltip.classList.remove('visible');
+        });
+      });
+    }
+
+    function clearCanvas() {
+      const container = $("#canvasBlocks");
+      container.innerHTML = `
+        <div class="canvas-empty">
+          <div class="canvas-empty-icon">📊</div>
+          <div class="canvas-empty-text">
+            회사를 선택하고 소스를 추가한 후<br>편집 버튼을 클릭하세요.
+          </div>
+        </div>
+      `;
+    }
+
     // Init
+    loadRecentWorks(); // localStorage에서 최근 작업 불러오기
     renderCompanies("");
     renderUploads();
     renderSchemas("");
