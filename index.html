@@ -959,6 +959,19 @@
     .schema-context .context-clear-btn:hover {
       color: var(--text);
     }
+
+    /* Company tag in schema items */
+    .schema-company-tag {
+      font-size: 10px;
+      padding: 3px 6px;
+      border-radius: 4px;
+      font-weight: 500;
+      white-space: nowrap;
+      background: rgba(20, 184, 166, .15);
+      color: #14B8A6;
+      border: 1px solid rgba(20, 184, 166, .3);
+      margin-left: 4px;
+    }
   </style>
 </head>
 
@@ -1216,6 +1229,18 @@
     let expandedSchemaIndex = null; // Track which schema's detail is expanded
     let selectedSchemaIndices = new Set(); // 선택된 스키마 인덱스들
 
+    // Company name Korean mapping
+    const companyNameKorean = {
+      "Samsung Electronics": "삼성전자",
+      "Hyundai Motor": "현대자동차",
+      "LG Energy Solution": "LG에너지솔루션",
+      "Kakao": "카카오",
+      "Naver": "네이버",
+      "POSCO": "포스코"
+    };
+
+    let currentContextSources = []; // 현재 컨텍스트의 소스들 (회사 정보 포함)
+
     const companies = [
       { name: "Samsung Electronics", datasets: 6, schema: { date:"YYYY-MM", company:"string", value:"number" } },
       { name: "Hyundai Motor", datasets: 6, schema: { date:"YYYY-MM", company:"string", value:"number" } },
@@ -1443,7 +1468,10 @@
       // 2. Current 탭 활성화
       setSchemaTab("current");
 
-      // 3. 컨텍스트 정보 표시 (회사 + 출처)
+      // 3. 컨텍스트 소스 저장 (회사 정보 포함)
+      currentContextSources = sources;
+
+      // 4. 컨텍스트 정보 표시 (회사 + 출처)
       const contextEl = $("#schemaContext");
       const contextContent = $("#schemaContextContent");
 
@@ -1461,10 +1489,10 @@
       contextContent.textContent = contextText;
       contextEl.style.display = "flex";
 
-      // 4. 검색 필터 비우기 (컨텍스트가 대신 표시됨)
+      // 5. 검색 필터 비우기 (컨텍스트가 대신 표시됨)
       $("#schemaSearch").value = "";
 
-      // 5. 출처로 필터링된 스키마 렌더링
+      // 6. 출처로 필터링된 스키마 렌더링
       const sourceNames = [...new Set(sources.map(s => s.sourceName))];
       renderSchemasMultiple(sourceNames);
     }
@@ -1495,6 +1523,14 @@
         const isChecked = selectedSchemaIndices.has(originalIndex);
         const tooltipText = sourceDefinitions[schema.sourceType] || schema.source;
 
+        // 스키마의 출처와 매칭되는 회사들 찾기 (한글로 변환)
+        const matchingCompanies = currentContextSources
+          .filter(s => s.sourceName === schema.source)
+          .map(s => companyNameKorean[s.companyName] || s.companyName);
+
+        // 중복 제거
+        const uniqueCompanies = [...new Set(matchingCompanies)];
+
         const wrapper = document.createElement("div");
         wrapper.className = "schema-item-wrapper";
 
@@ -1508,6 +1544,9 @@
               ${schema.source.slice(0,2)}
               <span class="source-tooltip">${tooltipText}</span>
             </span>
+            ${uniqueCompanies.map(company =>
+              `<span class="schema-company-tag">${company}</span>`
+            ).join('')}
           </div>
           <button class="schema-expand-btn">${isExpanded ? '▲' : '▼'}</button>
         `;
@@ -1998,6 +2037,7 @@
     $("#clearSchemaContext").addEventListener("click", () => {
       $("#schemaContext").style.display = "none";
       $("#schemaSearch").value = "";
+      currentContextSources = []; // 컨텍스트 소스 초기화
       renderSchemas("");
     });
 
